@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "548956990535",
+    "project_id": "flutterfirenelson",
+    "storage_bucket": "flutterfirenelson.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:548956990535:android:2d1a8b2e68d70769b89562",
+        "android_client_info": {
+          "package_name": "com.example.flutterfire"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA6tuxHQPF6vmhWWwI1UqVPRaP_QWGwywQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
