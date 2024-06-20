@@ -1,8 +1,6 @@
 plugins {
     id "com.android.application"
-    // START: FlutterFire Configuration
     id 'com.google.gms.google-services'
-    // END: FlutterFire Configuration
     id "kotlin-android"
     id "dev.flutter.flutter-gradle-plugin"
 }
@@ -25,9 +23,11 @@ if (flutterVersionName == null) {
     flutterVersionName = '1.0'
 }
 
+apply from : project(':flutter_config').projectDir.getPath() + "/dotenv.gradle"
+
 android {
     namespace "com.example.notes"
-    compileSdkVersion flutter.compileSdkVersion
+    compileSdk flutter.compileSdkVersion
     ndkVersion flutter.ndkVersion
 
     compileOptions {
