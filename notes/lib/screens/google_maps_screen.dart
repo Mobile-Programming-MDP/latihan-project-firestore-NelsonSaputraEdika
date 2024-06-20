@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
@@ -43,34 +42,6 @@ class _GoogleMapsScreenState extends State<GoogleMapsScreen> {
   }
 
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Google Map"),
-      ),
-      body: GoogleMap(
-        markers: _markers,
-        myLocationButtonEnabled: true,
-        myLocationEnabled: true,
-        initialCameraPosition: _cameraPosition,
-        mapType: MapType.normal,
-        onMapCreated: (GoogleMapController controller) {
-          _controller.complete(controller);
-          Future.delayed(const Duration(milliseconds: 500), () {
-            controller.showMarkerInfoWindow(_markerId);
-          });
-        },
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: _gotoLocation,
-        label: const Text("To Your Locarion"),
-        icon: Icon(Icons.directions),
-      ),
-    );
-  }
-
-  Future<void> _gotoLocation() async {
-    final GoogleMapController controller = await _controller.future;
-    await controller
-        .animateCamera(CameraUpdate.newCameraPosition(_cameraPosition));
+    return const Placeholder();
   }
 }
