@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:notes/models/note.dart';
+import 'package:notes/services/location_services.dart';
 import 'package:notes/services/note_service.dart';
 
 class NoteDialog extends StatefulWidget {
@@ -16,10 +18,10 @@ class _NoteDialogState extends State<NoteDialog> {
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
   XFile? _imageFile;
+  Position? _position;
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     if (widget.note != null) {
       _titleController.text = widget.note!.title;
@@ -27,14 +29,50 @@ class _NoteDialogState extends State<NoteDialog> {
     }
   }
 
-  Future<void> _pickImage() async {
-    final pickedFile =
-        await ImagePicker().pickImage(source: ImageSource.gallery);
+  Future<void> _getLocation() async {
+    final location = await LocationServices().getCurrentLocation();
+    setState(() {
+      _position = location;
+    });
+  }
+
+  Future<void> _pickImage(ImageSource source) async {
+    final pickedFile = await ImagePicker().pickImage(source: source);
     if (pickedFile != null) {
       setState(() {
         _imageFile = pickedFile;
       });
     }
+  }
+
+  void _showImageSourceActionSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) {
+        return SafeArea(
+          child: Wrap(
+            children: [
+              ListTile(
+                leading: Icon(Icons.photo_library),
+                title: Text('Gallery'),
+                onTap: () {
+                  _pickImage(ImageSource.gallery);
+                  Navigator.of(context).pop();
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.photo_camera),
+                title: Text('Camera'),
+                onTap: () {
+                  _pickImage(ImageSource.camera);
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   @override
@@ -64,22 +102,34 @@ class _NoteDialogState extends State<NoteDialog> {
             padding: EdgeInsets.only(
               top: 20,
             ),
-            child: Text('Image: '),
+            child: Text('Image : '),
           ),
           Expanded(
-            child: _imageFile != null
-                ? Image.network(_imageFile!.path, fit: BoxFit.cover)
-                : (widget.note?.imageUrl != null &&
-                        Uri.parse(widget.note!.imageUrl!).isAbsolute
-                    ? Image.network(
-                        widget.note!.imageUrl!,
-                        fit: BoxFit.cover,
-                      )
-                    : Container()),
+              child: _imageFile != null
+                  ? Image.network(
+                      _imageFile!.path,
+                      fit: BoxFit.cover,
+                    )
+                  : (widget.note?.imageUrl != null &&
+                          Uri.parse(widget.note!.imageUrl!).isAbsolute
+                      ? Image.network(
+                          widget.note!.imageUrl!,
+                          fit: BoxFit.cover,
+                        )
+                      : Container())),
+          TextButton(
+            onPressed: () => _showImageSourceActionSheet(context),
+            child: const Text('Pick Image : '),
           ),
           TextButton(
-            onPressed: _pickImage,
-            child: const Text('Pick Image'),
+            onPressed: _getLocation,
+            child: const Text('Get Location : '),
+          ),
+          Text(
+            _position?.latitude != null && _position?.longitude != null
+                ? "Current Location =: ${_position!.latitude.toString()}, ${_position!.longitude.toString()} "
+                : "Current Location =: ${widget.note?.lat}, ${widget.note?.lng}",
+            textAlign: TextAlign.start,
           )
         ],
       ),
@@ -102,12 +152,19 @@ class _NoteDialogState extends State<NoteDialog> {
               imageUrl = widget.note?.imageUrl;
             }
             Note note = Note(
-              id: widget.note?.id,
-              title: _titleController.text,
-              description: _descriptionController.text,
-              imageUrl: imageUrl,
-              createdAt: widget.note?.createdAt,
-            );
+                id: widget.note?.id,
+                title: _titleController.text,
+                description: _descriptionController.text,
+                imageUrl: imageUrl,
+                lat: widget.note?.lat.toString() !=
+                        _position!.latitude.toString()
+                    ? _position!.latitude.toString()
+                    : widget.note?.lat.toString(),
+                lng: widget.note?.lng.toString() !=
+                        _position!.longitude.toString()
+                    ? _position!.longitude.toString()
+                    : widget.note?.lng.toString(),
+                createdAt: widget.note?.createdAt);
             if (widget.note == null) {
               NoteService.addNote(note).whenComplete(() {
                 Navigator.of(context).pop();
